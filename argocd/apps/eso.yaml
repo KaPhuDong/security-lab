@@ -18,6 +18,12 @@ spec:
       values: |
         installCRDs: true
         replicaCount: 1
+        # Disable webhook để tránh race condition với eso-config app
+        # Webhook chỉ validate, không cần thiết cho lab
+        webhook:
+          create: false
+        certController:
+          create: false
         resources:
           limits:
             cpu: 100m
