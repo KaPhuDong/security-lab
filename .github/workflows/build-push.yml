@@ -1,4 +1,5 @@
 # Build and push Docker image to GitHub Container Registry
+# Lab 2.2: added Trivy CVE scan + Cosign image signing
 name: Build and Push Image
 
 on:
