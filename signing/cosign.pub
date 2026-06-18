@@ -1,0 +1,7 @@
+# PLACEHOLDER - Replace with actual public key after running: cosign generate-key-pair
+# Then copy cosign.pub content here and update gatekeeper/policies/cluster-image-policy.yaml
+#
+# Example format:
+# -----BEGIN PUBLIC KEY-----
+# MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE<base64-encoded-key>
+# -----END PUBLIC KEY-----

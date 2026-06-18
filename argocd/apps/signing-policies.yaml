@@ -1,0 +1,31 @@
+# ArgoCD App: Deploy ClusterImagePolicy (signing policies)
+# sync-wave: 1 → SAU policy-controller để CRD đã tồn tại
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: signing-policies
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KaPhuDong/security-lab.git
+    path: signing/policies
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cosign-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 1
+        maxDuration: 60s
+    syncOptions:
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

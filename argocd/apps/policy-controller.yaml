@@ -1,0 +1,35 @@
+# ArgoCD App: Cài Sigstore Policy Controller
+# Verify cosign signature trước khi pod được schedule
+# sync-wave: -1 → cài trước ClusterImagePolicy
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: policy-controller
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: https://sigstore.github.io/helm-charts
+    chart: policy-controller
+    targetRevision: 0.10.0
+    helm:
+      values: |
+        commonNodeSelector: {}
+        webhook:
+          replicaCount: 1
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cosign-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,7 +1,12 @@
-# Namespace: Tạo namespace demo cho API workload
+# Namespace: Tao namespace demo cho API workload
 apiVersion: v1
 kind: Namespace
 metadata:
   name: demo
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+  labels:
+    # Lab 2.2: enable Sigstore Policy Controller de verify cosign signature
+    # QUAN TRONG: chi uncomment SAU khi CI da sign image thanh cong
+    # Gan truoc khi ky se chan luon app-api
+    # policy.sigstore.dev/include: "true"
