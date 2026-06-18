@@ -1,20 +1,17 @@
 # ClusterImagePolicy: chỉ cho phép image từ ghcr.io/kaphudong đã được ký bằng cosign
 # Áp cho namespace có label: policy.sigstore.dev/include=true
-# QUAN TRỌNG: gắn label cho ns SAU khi image đã ký, gắn trước sẽ chặn app-api luôn
+# QUAN TRỌNG: gắn label cho ns SAU khi image đã ký, gắn trước sẽ chặn luôn app-api
 apiVersion: policy.sigstore.dev/v1beta1
 kind: ClusterImagePolicy
 metadata:
   name: require-cosign-signature
 spec:
   images:
-  # Chỉ enforce cho image của project này
   - glob: "ghcr.io/kaphudong/w10-api*"
   authorities:
   - key:
-      # Public key từ signing/cosign.pub
-      # REPLACE sau khi chạy: cosign generate-key-pair
-      # Paste nội dung cosign.pub vào đây (bỏ dòng comment)
       data: |
         -----BEGIN PUBLIC KEY-----
-        REPLACE_WITH_ACTUAL_PUBLIC_KEY_FROM_cosign.pub
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWSkxk8UCgWLOOlDZQ6jdsSWaqFUp
+        rBuCt0Bcr8qdgJQapMJypB5EdlaFqj5oe0Wo0RH6+DV3EmeyinVgrqzpeA==
         -----END PUBLIC KEY-----

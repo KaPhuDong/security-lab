@@ -7,6 +7,5 @@ metadata:
     argocd.argoproj.io/sync-wave: "0"
   labels:
     # Lab 2.2: enable Sigstore Policy Controller de verify cosign signature
-    # QUAN TRONG: chi uncomment SAU khi CI da sign image thanh cong
-    # Gan truoc khi ky se chan luon app-api
-    # policy.sigstore.dev/include: "true"
+    # Image da duoc ky trong CI -> an toan de enable
+    policy.sigstore.dev/include: "true"
