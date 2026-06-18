@@ -1,0 +1,28 @@
+# RBAC cho PostSync hook Job: chỉ cần quyền get/list CRDs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gatekeeper-crd-waiter
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gatekeeper-crd-waiter
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: gatekeeper-system
+roleRef:
+  kind: ClusterRole
+  name: gatekeeper-crd-waiter
+  apiGroup: rbac.authorization.k8s.io

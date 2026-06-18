@@ -1,6 +1,6 @@
 # Constraint: Bắt buộc có resources.limits (F-02)
 apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sRequireResourceLimits
+kind: K8sRequireResourceLimit
 metadata:
   name: require-resource-limits
   annotations:

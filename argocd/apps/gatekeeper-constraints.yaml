@@ -1,6 +1,7 @@
 # ArgoCD App: Deploy Gatekeeper Constraints
 # sync-wave: 1 → sau templates (0), trước app-api (2)
 # Constraints là cluster-scoped resources → destination namespace để trống
+# Dùng retry vì CRD được sinh bởi ConstraintTemplate cần vài giây sau khi template apply xong
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -21,6 +22,12 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m
     syncOptions:
       - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
