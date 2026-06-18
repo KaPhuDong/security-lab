@@ -1,10 +1,10 @@
-# ArgoCD App: Deploy Gatekeeper ConstraintTemplates
-# sync-wave: 0 → sau controller (-1), trước constraints (1)
-# ConstraintTemplates là cluster-scoped resources → destination namespace để trống
+# ArgoCD App: Deploy Gatekeeper ConstraintTemplates + Constraints trong 1 App
+# Templates (wave 0) apply trước → Gatekeeper sinh CRD → Constraints (wave 1) apply sau
+# Không cần Job/hook, không cần 2 App riêng → sync nhanh hơn nhiều
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gatekeeper-templates
+  name: gatekeeper-policies
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KaPhuDong/security-lab.git
-    path: gatekeeper/templates
+    path: gatekeeper/policies
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
@@ -24,9 +24,9 @@ spec:
     retry:
       limit: 5
       backoff:
-        duration: 10s
-        factor: 2
-        maxDuration: 2m
+        duration: 5s
+        factor: 1
+        maxDuration: 30s
     syncOptions:
       - ServerSideApply=true
       - SkipDryRunOnMissingResource=true

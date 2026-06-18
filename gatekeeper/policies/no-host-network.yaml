@@ -1,0 +1,35 @@
+# ConstraintTemplate + Constraint: Cấm hostNetwork: true
+---
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8snohostnetwork
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sNoHostNetwork
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package k8snohostnetwork
+
+      violation[{"msg": msg}] {
+        input.review.object.spec.hostNetwork == true
+        msg := "Pod bị cấm dùng hostNetwork: true. Cách ly network pod khỏi host."
+      }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sNoHostNetwork
+metadata:
+  name: no-host-network
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]

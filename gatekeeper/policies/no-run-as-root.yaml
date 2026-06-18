@@ -1,0 +1,49 @@
+# ConstraintTemplate + Constraint: Cấm runAsUser: 0 (F-04)
+---
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8snorunasroot
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sNoRunAsRoot
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package k8snorunasroot
+
+      violation[{"msg": msg}] {
+        container := input.review.object.spec.containers[_]
+        container.securityContext.runAsUser == 0
+        msg := sprintf("Container '%v' bị cấm chạy với runAsUser: 0 (root).", [container.name])
+      }
+
+      violation[{"msg": msg}] {
+        input.review.object.spec.securityContext.runAsUser == 0
+        msg := "Pod bị cấm chạy với runAsUser: 0 (root) ở pod-level securityContext."
+      }
+
+      violation[{"msg": msg}] {
+        container := input.review.object.spec.initContainers[_]
+        container.securityContext.runAsUser == 0
+        msg := sprintf("InitContainer '%v' bị cấm chạy với runAsUser: 0 (root).", [container.name])
+      }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sNoRunAsRoot
+metadata:
+  name: no-run-as-root
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]
+    namespaces:
+      - demo

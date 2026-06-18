@@ -1,0 +1,53 @@
+# ConstraintTemplate + Constraint: Cấm image tag :latest (F-01)
+# wave 0 = template trước, wave 1 = constraint sau (CRD đã có)
+---
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8snolatesttag
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sNoLatestTag
+  targets:
+  - target: admission.k8s.gatekeeper.sh
+    rego: |
+      package k8snolatesttag
+
+      violation[{"msg": msg}] {
+        container := input.review.object.spec.containers[_]
+        has_latest_tag(container.image)
+        msg := sprintf("Container '%v' dùng image tag :latest hoặc không pin version: '%v'. Phải dùng tag cụ thể.", [container.name, container.image])
+      }
+
+      violation[{"msg": msg}] {
+        container := input.review.object.spec.initContainers[_]
+        has_latest_tag(container.image)
+        msg := sprintf("InitContainer '%v' dùng image tag :latest hoặc không pin version: '%v'.", [container.name, container.image])
+      }
+
+      has_latest_tag(image) {
+        endswith(image, ":latest")
+      }
+
+      has_latest_tag(image) {
+        not contains(image, ":")
+      }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sNoLatestTag
+metadata:
+  name: no-latest-tag
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]
+    namespaces:
+      - demo
