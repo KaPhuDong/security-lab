@@ -1,0 +1,16 @@
+# Constraint: Cấm image tag :latest (F-01)
+# Áp cho Pods trong namespace demo (Deployment, Rollout, DaemonSet...)
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sNoLatestTag
+metadata:
+  name: no-latest-tag
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]
+    namespaces:
+      - demo

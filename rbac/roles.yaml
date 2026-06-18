@@ -1,0 +1,53 @@
+# Lab 1.1 - RBAC Roles
+# alice: developer - CRUD workload trong ns demo
+# bob: sre - xem + thao tác pod toàn cụm
+# carol: viewer - chỉ đọc toàn cụm
+
+---
+# Role cho alice: CRUD workload chỉ trong namespace demo
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: demo
+rules:
+- apiGroups: ["apps", "argoproj.io"]
+  resources: ["deployments", "replicasets", "statefulsets", "daemonsets", "rollouts"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "serviceaccounts"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods/log", "pods/exec"]
+  verbs: ["get", "list", "create"]
+
+---
+# ClusterRole cho bob: xem + thao tác pod toàn cụm
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sre
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/exec"]
+  verbs: ["get", "list", "watch", "delete"]
+- apiGroups: [""]
+  resources: ["nodes", "namespaces", "services", "endpoints", "events"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps", "argoproj.io"]
+  resources: ["deployments", "replicasets", "statefulsets", "daemonsets", "rollouts"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list"]
+
+---
+# ClusterRole cho carol: chỉ đọc toàn cụm
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: viewer
+rules:
+- apiGroups: ["", "apps", "argoproj.io", "batch", "autoscaling"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]

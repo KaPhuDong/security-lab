@@ -1,0 +1,11 @@
+# Test: Pod thiếu resources.limits → REJECT (F-02)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-bad-no-limits
+  namespace: demo
+spec:
+  containers:
+  - name: app
+    image: nginx:1.25.3          # tag hợp lệ
+    # không có resources.limits → vi phạm
