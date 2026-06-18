@@ -1,5 +1,6 @@
 # ArgoCD App: Deploy Gatekeeper ConstraintTemplates
 # sync-wave: 0 → sau controller (-1), trước constraints (1)
+# ConstraintTemplates là cluster-scoped resources → destination namespace để trống
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -15,10 +16,11 @@ spec:
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: gatekeeper-system
+    namespace: ""
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
