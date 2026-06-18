@@ -47,6 +47,7 @@ spec:
       kinds: ["Rollout"]
     namespaces:
       - demo
+      - payments
   parameters:
     labels:
       - "owner"

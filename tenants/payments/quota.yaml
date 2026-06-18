@@ -1,0 +1,46 @@
+# ResourceQuota + LimitRange cho namespace payments
+# ResourceQuota: ngân sách tổng của cả team
+# LimitRange: default limit cho pod không khai báo → tránh eviction
+
+---
+# ResourceQuota: giới hạn tổng tài nguyên team payments được dùng
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: payments-quota
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: "512Mi"
+    limits.cpu: "1000m"
+    limits.memory: "1Gi"
+    pods: "10"
+    services: "5"
+    persistentvolumeclaims: "3"
+
+---
+# LimitRange: default limit/request cho pod không khai báo
+# → pod thiếu limits vẫn chạy được (nhờ LimitRange inject default)
+# → sau khi inject, Gatekeeper require-resource-limits sẽ pass
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: payments-limitrange
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  limits:
+  - type: Container
+    default:          # inject nếu không khai báo limits
+      cpu: 200m
+      memory: 128Mi
+    defaultRequest:   # inject nếu không khai báo requests
+      cpu: 100m
+      memory: 64Mi
+    max:              # hard ceiling mỗi container
+      cpu: 500m
+      memory: 512Mi

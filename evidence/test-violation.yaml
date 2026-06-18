@@ -1,0 +1,27 @@
+# Test manifest: vi phạm constraint cũ từ Lab 1
+# Deploy cái này vào ns payments → phải bị Gatekeeper chặn
+# Chứng minh: guardrail cũ tự áp cho team B mà không cần viết luật mới
+#
+# Vi phạm: dùng image :latest (no-latest-tag constraint)
+# Vi phạm: không có resources.limits (require-resource-limit constraint)
+# Vi phạm: không có label owner (require-owner-label constraint)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-payments-deploy
+  namespace: payments
+  # thiếu label owner → vi phạm require-owner-label
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bad-deploy
+  template:
+    metadata:
+      labels:
+        app: bad-deploy
+    spec:
+      containers:
+      - name: app
+        image: nginx:latest    # vi phạm no-latest-tag
+        # không có resources.limits → vi phạm require-resource-limit

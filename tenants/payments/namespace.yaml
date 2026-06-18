@@ -1,0 +1,12 @@
+# Namespace cho team payments (tenant B)
+# sync-wave: -1 → tạo namespace trước tất cả resource của tenant
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    team: payments
+    # Lab 2.2: enable Sigstore Policy Controller verify signature
+    policy.sigstore.dev/include: "true"

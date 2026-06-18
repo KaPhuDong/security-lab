@@ -1,0 +1,26 @@
+# ArgoCD App: Deploy payments tenant infrastructure
+# (namespace + rbac + quota + networkpolicy)
+# sync-wave: 0 → sau app-common (-1), trước app-api (2)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: payments
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KaPhuDong/security-lab.git
+    path: tenants/payments
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: payments
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

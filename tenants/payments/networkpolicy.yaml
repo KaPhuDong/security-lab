@@ -1,0 +1,57 @@
+# NetworkPolicy cô lập namespace payments
+# Yêu cầu: minikube --cni=calico để enforce NetworkPolicy
+# 2 policy:
+#   1. default-deny-ingress: chặn tất cả traffic VÀO payments từ ngoài
+#   2. deny-egress-to-demo: chặn payments GỌI RA sang ns demo
+
+---
+# Policy 1: Default deny tất cả ingress vào payments
+# Chỉ cho phép traffic nội bộ trong cùng ns payments
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  podSelector: {}    # áp cho tất cả pods trong ns payments
+  policyTypes:
+  - Ingress
+  ingress:
+  # Chỉ cho phép traffic từ trong cùng namespace payments
+  - from:
+    - podSelector: {}
+
+---
+# Policy 2: Deny egress từ payments sang namespace demo
+# payments không gọi được sang service của team demo
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-egress-to-demo
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  # Cho phép DNS (cần để resolve service name)
+  - ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Cho phép traffic trong cùng namespace payments
+  - to:
+    - podSelector: {}
+  # Cho phép ra internet/external (nếu cần pull image, gọi AWS, etc.)
+  - to:
+    - namespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+          - demo    # CHẶN gọi sang ns demo

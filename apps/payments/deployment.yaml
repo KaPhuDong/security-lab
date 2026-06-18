@@ -1,0 +1,58 @@
+# Workload team B - payments service
+# Kế thừa guardrail cũ (Gatekeeper constraints từ Lab 1):
+#   - image pinned version (no :latest) ✓
+#   - resources.limits đầy đủ ✓
+#   - không runAsUser: 0 ✓
+#   - không hostNetwork ✓
+#   - có label owner ✓
+# Image phải được ký bằng cosign (Lab 2.2) trước khi deploy vào ns payments
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+  namespace: payments
+  labels:
+    app: payments
+    owner: team-payments      # required by gatekeeper require-owner-label
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payments
+  template:
+    metadata:
+      labels:
+        app: payments
+        owner: team-payments
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000         # non-root, không phải 0
+      containers:
+      - name: payments
+        image: ghcr.io/kaphudong/w10-api:0.1.0   # pinned version, đã ký
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: VERSION
+          value: "payments-v1"
+        - name: ERROR_RATE
+          value: "0"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m           # có limits → pass require-resource-limit constraint
+            memory: 128Mi

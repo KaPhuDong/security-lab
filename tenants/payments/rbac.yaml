@@ -1,0 +1,46 @@
+# RBAC cho team payments
+# Dùng Role + RoleBinding (KHÔNG ClusterRoleBinding) → bó trong ns payments
+# payments-dev: CRUD workload, KHÔNG được đọc secrets, KHÔNG sửa rolebindings
+# Chứng minh: payments-dev trong payments=yes, trong demo=no (cô lập)
+
+---
+# Role: payments-dev được CRUD workload trong ns payments
+# Bỏ: secrets, rolebindings (least-privilege)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: payments-developer
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "serviceaccounts"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods/log", "pods/exec"]
+  verbs: ["get", "list", "create"]
+# KHÔNG có: secrets → payments-dev không đọc được secret
+# KHÔNG có: rolebindings → payments-dev không leo thang quyền
+
+---
+# RoleBinding: gắn payments-dev vào Role trong ns payments (KHÔNG ClusterRoleBinding)
+# → payments-dev KHÔNG với được sang ns demo
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: payments-dev-binding
+  namespace: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+subjects:
+- kind: User
+  name: payments-dev
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: payments-developer
+  apiGroup: rbac.authorization.k8s.io

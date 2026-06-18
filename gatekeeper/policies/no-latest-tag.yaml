@@ -51,3 +51,4 @@ spec:
       kinds: ["Pod"]
     namespaces:
       - demo
+      - payments
