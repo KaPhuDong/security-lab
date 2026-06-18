@@ -1,5 +1,5 @@
 # ArgoCD App: Deploy OPA Gatekeeper controller
-# sync-wave: -1 để install controller trước templates và constraints
+# sync-wave: -1 để install controller trước policies
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,13 +12,15 @@ spec:
   source:
     repoURL: https://open-policy-agent.github.io/gatekeeper/charts
     chart: gatekeeper
-    targetRevision: 3.18.0
+    targetRevision: 3.17.2
     helm:
       values: |
         replicas: 1
         auditInterval: 60
         validatingWebhookTimeoutSeconds: 10
         mutatingWebhookTimeoutSeconds: 10
+        podDisruptionBudget:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: gatekeeper-system

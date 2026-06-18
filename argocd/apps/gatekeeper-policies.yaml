@@ -16,7 +16,7 @@ spec:
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: ""
+    namespace: gatekeeper-system
   syncPolicy:
     automated:
       prune: true
