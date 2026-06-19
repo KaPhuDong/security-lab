@@ -29,9 +29,14 @@ spec:
               repeat_interval: 12h
               receiver: 'email-notifications'
               routes:
+              # Null: Watchdog keepalive — bỏ qua
               - receiver: 'null'
                 matchers:
                 - alertname = "Watchdog"
+              # Null: minikube single-node noise alerts — không có quorum thật
+              - receiver: 'null'
+                matchers:
+                - alertname =~ "KubeSchedulerDown|KubeControllerManagerDown|etcdMembersDown|etcdInsufficientMembers|TargetDown|AlertmanagerFailedToSendAlerts"
             receivers:
             - name: 'null'
             - name: 'email-notifications'
